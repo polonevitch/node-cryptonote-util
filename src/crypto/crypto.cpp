@@ -2,7 +2,7 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <alloca.h>
+#include "platform/msc/alloca.h"
 #include <cassert>
 #include <cstddef>
 #include <cstdint>

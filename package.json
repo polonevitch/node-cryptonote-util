@@ -12,7 +12,12 @@
   },
   "dependencies": {
     "bindings": "*",
-    "nan": "^2.0.0"
+    "nan": "^2.0.0",
+    "cmake-js": "*"
+  },
+  "scripts": {
+    "install": "cmake-js compile",
+    "test": "mocha tests"
   },
   "keywords": [
     "cryptonight",
