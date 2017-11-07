@@ -100,7 +100,7 @@ NAN_METHOD(convert_blob) {
 
     if (!get_block_hashing_blob(b, output))
         return THROW_ERROR_EXCEPTION("Failed to create mining block");
-    
+
     v8::Local<v8::Value> returnValue = Nan::CopyBuffer((char*)output.data(), output.size()).ToLocalChecked();
     info.GetReturnValue().Set(
         returnValue
@@ -138,7 +138,7 @@ NAN_METHOD(convert_blob_fa) {
 //    info.GetReturnValue().Set(
 //        returnValue
 //    );
-    
+
     v8::Local<v8::Value> returnValue = Nan::CopyBuffer((char*)output.data(), output.size()).ToLocalChecked();
     info.GetReturnValue().Set(
         returnValue
@@ -165,7 +165,7 @@ void get_block_id(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     crypto::hash block_id;
     if (!get_block_hash(b, block_id))
         return THROW_ERROR_EXCEPTION("Failed to calculate hash for block");
-    
+
     char *cstr = reinterpret_cast<char*>(&block_id);
     v8::Local<v8::Value> returnValue = Nan::CopyBuffer(cstr, 32).ToLocalChecked();
     info.GetReturnValue().Set(
@@ -293,7 +293,7 @@ void address_decode(const Nan::FunctionCallbackInfo<v8::Value>& info) {
         info.GetReturnValue().Set(Nan::Undefined());
     }
     //    info.GetReturnValue().Set(Nan::Undefined());
-    
+
 
     account_public_address adr;
     if (!::serialization::parse_binary(data, adr) || !crypto::check_key(adr.m_spend_public_key) || !crypto::check_key(adr.m_view_public_key))
@@ -362,6 +362,35 @@ void address_decode_integrated(const Nan::FunctionCallbackInfo<v8::Value>& info)
     }
 }
 
+NAN_METHOD(cryptonight) {
+	bool fast = false;
+
+	if (info.Length() < 1)
+		return THROW_ERROR_EXCEPTION("You must provide one argument.");
+
+	if (info.Length() >= 2) {
+		if (!info[1]->IsBoolean())
+			return THROW_ERROR_EXCEPTION("Argument 2 should be a boolean");
+		fast = info[1]->ToBoolean()->BooleanValue();
+	}
+
+	Local<Object> target = Nan::To<Object>(info[0]).ToLocalChecked();
+
+	if (!Buffer::HasInstance(target))
+		return THROW_ERROR_EXCEPTION("Argument should be a buffer object.");
+
+	char * input = Buffer::Data(target);
+	char *output = (char*)malloc(sizeof(char) * 32);
+
+	uint32_t input_len = Buffer::Length(target);
+
+	if (fast)
+		crypto::cn_fast_hash((const void *)input, input_len, output);
+	else
+		crypto::cn_slow_hash((const void *)input, input_len, output);
+
+	info.GetReturnValue().Set(Nan::NewBuffer(output, 32).ToLocalChecked());
+}
 
 NAN_MODULE_INIT(init) {
     Nan::Set(target, Nan::New("construct_block_blob").ToLocalChecked(), Nan::GetFunction(Nan::New<FunctionTemplate>(construct_block_blob)).ToLocalChecked());
@@ -370,6 +399,8 @@ NAN_MODULE_INIT(init) {
     Nan::Set(target, Nan::New("convert_blob_bb").ToLocalChecked(), Nan::GetFunction(Nan::New<FunctionTemplate>(convert_blob_bb)).ToLocalChecked());
     Nan::Set(target, Nan::New("address_decode").ToLocalChecked(), Nan::GetFunction(Nan::New<FunctionTemplate>(address_decode)).ToLocalChecked());
     Nan::Set(target, Nan::New("address_decode_integrated").ToLocalChecked(), Nan::GetFunction(Nan::New<FunctionTemplate>(address_decode_integrated)).ToLocalChecked());
+
+    Nan::Set(target, Nan::New("cryptonight").ToLocalChecked(), Nan::GetFunction(Nan::New<FunctionTemplate>(cryptonight)).ToLocalChecked());
 }
 
 NODE_MODULE(cryptonote, init)
