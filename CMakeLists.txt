@@ -9,7 +9,11 @@ include_directories(${CMAKE_JS_INC})
 
 # Boost dependency
 # You need to have Boost built and env vars BOOST_ROOT, BOOST_LIBRARYDIR.
-set(Boost_USE_STATIC_LIBS OFF)
+IF(MSVC)
+  set(Boost_USE_STATIC_LIBS ON)
+ELSE(MSVC)
+  set(Boost_USE_STATIC_LIBS OFF)
+ENDIF(MSVC)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost 1.58 REQUIRED COMPONENTS date_time system thread filesystem regex program_options)
