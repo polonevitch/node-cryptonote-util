@@ -19,6 +19,9 @@
     "install": "cmake-js compile",
     "test": "mocha tests"
   },
+  "config": {
+    "unsafe-perm": true
+  },
   "keywords": [
     "cryptonight",
     "cryptonote"
